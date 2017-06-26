@@ -172,7 +172,6 @@ android {
     dexOptions {
         // Skip pre-dexing when running on Travis CI or when disabled via -Dpre-dex=false.
         preDexLibraries = preDexEnabled && !isTravis
-        incremental = true;
     }
 
     testOptions {
@@ -193,9 +192,9 @@ release {
 
     def tagMessage = readWhatsNewFile("whatsnew-${trackProperty()}");
 
-    versionStrategy Strategies.PRE_RELEASE_ALPHA_BETA
+    versionStrategy Strategies.FINAL
 
-    android.defaultConfig.versionName = project.version.toString()
+    android.defaultConfig.versionName = "3.1.2"//project.version.toString()
 
     tagStrategy {
         generateMessage = { version -> "\n\nRelease of $version.version\n$tagMessage" }
