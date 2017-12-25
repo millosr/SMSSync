@@ -19,7 +19,7 @@ import org.ajoberstar.gradle.git.release.opinion.Strategies
 import org.ajoberstar.grgit.Grgit
 
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
+//apply plugin: 'me.tatarka.retrolambda'
 apply plugin: 'org.ajoberstar.release-opinion'
 apply plugin: 'com.github.triplet.play'
 
@@ -125,6 +125,8 @@ android {
         applicationId "org.addhen.smssync"
         buildConfigField "String", "GOOGLE_FORM_URL",
                 project.hasProperty('googleDocsForm') ? googleDocsForm : "\"\""
+
+        vectorDrawables.useSupportLibrary = true
     }
 
     lintOptions {
@@ -137,22 +139,24 @@ android {
     }
 
     android.applicationVariants.all { variant ->
-        variant.outputs.each { output ->
-            def outputFile = output.outputFile
-            if (outputFile != null && outputFile.name.endsWith('.apk')) {
-                def newName = outputFile.name.replace(outputFile.name,
+        variant.outputs.all { output ->
+            def outputFileName = output.outputFileName
+            if (outputFileName != null && outputFileName.endsWith('.apk')) {
+                def newName = outputFileName.replace(outputFile.name,
                         "smssync-${variant.name}-v" + defaultConfig.versionName + "-" +
                                 variant.buildType.name.toUpperCase() +
                                 ".apk");
 
-                output.outputFile = file("$project.buildDir/apk/" + newName);
-                if (output.zipAlign) {
+                output.outputFileName = "$project.buildDir/apk/" + newName;
+                /*if (output.zipAlign) {
                     output.zipAlign.outputFile =
-                            file("$project.buildDir/apk/" + newName.replace("-unaligned", ""));
-                }
+                            new File("$project.buildDir/apk/" + newName.replace("-unaligned", ""));
+                }*/
             }
         }
     }
+
+    flavorDimensions "tier"
 
     productFlavors {
 
@@ -181,11 +185,12 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
+    buildToolsVersion '26.0.2'
 }
 
-retrolambda {
+/*retrolambda {
     jvmArgs '-noverify'
-}
+}*/
 
 release {
     grgit = Grgit.open(dir: '.')
