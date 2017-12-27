@@ -48,6 +48,8 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import okhttp3.Response;
+
 /**
  * Posts {@link Message} to a configured web service
  *
@@ -371,14 +373,14 @@ public class PostMessage extends ProcessMessage {
                 mFileManager.append("HTTP Client Response: " + response);
                 smssyncResponses = gson.fromJson(response, SmssyncResponse.class);
             } catch (Exception e) {
-                Logger.log(TAG, "Task checking crashed " + e.getMessage() + " response: "
-                        + messageHttpClient.getResponse());
                 try {
-                    mFileManager.append(
-                            "Task crashed: " + e.getMessage() + " response: " + messageHttpClient
-                                    .getResponse().body().string());
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                    Response response = messageHttpClient.getResponse();
+                    Logger.log(TAG, "Task checking crashed: " + e.getMessage() + ", response: " + response);
+                    mFileManager.append("Task crashed: " + e.getMessage() + " response: " +
+                            ((response != null) ? response.body().string() : "null"));
+                } catch (Exception e1) {
+                    Logger.log(TAG, "Error handling task crash", e1);
+                    Logger.log(TAG, "Task crashed: ", e);
                 }
             }
 
