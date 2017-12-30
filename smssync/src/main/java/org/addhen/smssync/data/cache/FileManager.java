@@ -43,19 +43,21 @@ public class FileManager {
 
     private String mName;
 
-    PrefsFactory mPrefsFactory;
+    private String mLogDirectory;
+
+    private PrefsFactory mPrefsFactory;
 
     @Inject
     public FileManager(Context context, PrefsFactory prefsFactory) {
-        this(LOG_NAME);
         mPrefsFactory = prefsFactory;
-    }
 
-    public FileManager(String name) {
-        mName = name;
-        mDateFormat = "dd-MM kk:mm";
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            final File logFile = getFile(name);
+        //mLogDirectory = Environment.getExternalStorageDirectory();
+        mLogDirectory = context.getFilesDir().getAbsolutePath();
+        mName = LOG_NAME;
+        mDateFormat = "dd-MM-yy kk:mm:ss";
+
+        if (isMounted()) {
+            final File logFile = getFile(mName);
             if (logFile.isFile() && logFile.exists()) {
                 rotate(logFile);
             }
@@ -66,7 +68,11 @@ public class FileManager {
                 e.printStackTrace();
             }
         }
+    }
 
+    private boolean isMounted() {
+        //return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState();
+        return true;
     }
 
     private void rotate(final File logFile) {
@@ -119,8 +125,8 @@ public class FileManager {
      * @param name The name of the file.
      * @return The log file.
      */
-    public static File getFile(String name) {
-        return new File(Environment.getExternalStorageDirectory(), name);
+    public File getFile(String name) {
+        return new File(mLogDirectory + File.separator + name);
     }
 
     /**
@@ -227,7 +233,8 @@ public class FileManager {
             sb.append(format(new Date()))
                     .append(" ").append(s);
             mWriter.println(sb);
-            Logger.log(TAG, "Log " + sb);
+            mWriter.flush();
+            Logger.log(TAG, sb.toString());
         }
     }
 
