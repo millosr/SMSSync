@@ -453,9 +453,9 @@
     <string name="message_processed_json_failed">SMSsync konnte keine JSON Antwort erstellen.
     </string>
     <string name="queued_messages_request_status">Queued Messages POST request returned status
-        %1$s\n and body %2$s
+        %1$d\n and body %2$s
     </string>
-    <string name="messages_result_request_status">Message result GET request returned status %1$s\n
+    <string name="messages_result_request_status">Message result GET request returned status %1$d\n
         and body %2$s
     </string>
     <!--enable message results api-->

@@ -458,10 +458,10 @@
     <string name="message_processed_success">SMSsync はこのメッセージを正常に処理しました。</string>
     <string name="message_processed_failed">SMSsync はこのメッセージの処理を失敗しました。</string>
     <string name="message_processed_json_failed">SMSsync は JSON レスポンスの作成に失敗しました。</string>
-    <string name="queued_messages_request_status">キューに入れられた、メッセージ POST リクエストがステータス %1$s\nおよびボディ %2$s
+    <string name="queued_messages_request_status">キューに入れられた、メッセージ POST リクエストがステータス %1$d\nおよびボディ %2$s
         を返しました
     </string>
-    <string name="messages_result_request_status">メッセージ結果 GET リクエストがステータス %1$s\nおよびボディ %2$s を返しました
+    <string name="messages_result_request_status">メッセージ結果 GET リクエストがステータス %1$d\nおよびボディ %2$s を返しました
     </string>
     <!--enable message results api-->
     <string name="chk_enable_message_results_api">メッセージ結果 API を有効にする</string>

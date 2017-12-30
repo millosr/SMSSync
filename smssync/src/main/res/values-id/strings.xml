@@ -441,10 +441,10 @@
     <string name="message_processed_failed">SMSsync telah gagal memproses pesan ini.</string>
     <string name="message_processed_json_failed">SMSsync telah gagal membuat JSON respon.</string>
     <string name="queued_messages_request_status">Pesan antri POST permintaan kembali statusnya
-        %1$s\n dan tubuh %2$s
+        %1$d\n dan tubuh %2$s
     </string>
     <string name="messages_result_request_status">Hasil pesan permintaan GET kembali statusnya
-        %1$s\n dan tubuh %2$s
+        %1$d\n dan tubuh %2$s
     </string>
     <!--enable message results api-->
     <string name="chk_enable_message_results_api">Aktifkan Hasil Pesan API\"</string>
