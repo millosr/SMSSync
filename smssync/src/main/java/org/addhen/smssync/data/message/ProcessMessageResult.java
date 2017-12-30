@@ -31,6 +31,7 @@ import org.addhen.smssync.data.net.BaseHttpClient;
 import org.addhen.smssync.data.repository.datasource.message.MessageDataSource;
 import org.addhen.smssync.data.repository.datasource.webservice.WebServiceDataSource;
 import org.addhen.smssync.data.util.JsonUtils;
+import org.addhen.smssync.data.util.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -45,19 +46,23 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by Kamil Kalfas(kkalfas@soldevelo.com) on 23.04.14.
  * <p/>
  * This class handling Message Results API
  * <p/>
- * POST ?task=sent queued_messages {@link #sendQueuedMessagesPOSTRequest(org.addhen.smssync.models.SyncUrl,
- * org.addhen.smssync.models.QueuedMessages)} POST ?task=results message_results {@link
- * #sendMessageResultPOSTRequest(org.addhen.smssync.models.SyncUrl, java.util.List)} GET
- * ?task=results {@link #sendMessageResultGETRequest(org.addhen.smssync.models.SyncUrl)}
+ * POST ?task=sent queued_messages {@link #sendQueuedMessagesPOSTRequest(
+ * org.addhen.smssync.data.entity.SyncUrl, org.addhen.smssync.data.entity.QueuedMessages)}
+ * POST ?task=results message_results {@link #sendMessageResultPOSTRequest(
+ * org.addhen.smssync.data.entity.SyncUrl, java.util.List)}
+ * GET ?task=results {@link #sendMessageResultGETRequest(org.addhen.smssync.data.entity.SyncUrl)}
  */
 @Singleton
 public class ProcessMessageResult {
+
+    protected static final String TAG = ProcessMessageResult.class.getSimpleName();
 
     private static final String MESSAGE_RESULT_JSON_KEY = "message_result";
 
@@ -140,12 +145,13 @@ public class ProcessMessageResult {
             mAppHttpClient.setMethod(BaseHttpClient.HttpMethod.POST);
             mAppHttpClient.setRequestBody(body);
             mAppHttpClient.execute();
-        } catch (Exception e) {
-            mFileManager.append(mContext.getString(R.string.message_processed_failed));
-        } finally {
+
             if (200 == mAppHttpClient.getResponse().code()) {
                 mFileManager.append(mContext.getString(R.string.message_processed_success));
             }
+        } catch (Exception e) {
+            Logger.log(TAG, "sendMessageResult failed", e);
+            mFileManager.append(mContext.getString(R.string.message_processed_failed) + " " + e.getMessage());
         }
     }
 
@@ -169,30 +175,22 @@ public class ProcessMessageResult {
                 mAppHttpClient.setMethod(BaseHttpClient.HttpMethod.POST);
                 mAppHttpClient.setRequestBody(body);
                 mAppHttpClient.execute();
-            } catch (Exception e) {
-                e.printStackTrace();
-                mFileManager.append("process crashed");
-                mFileManager.append(mContext.getString(R.string.message_processed_failed));
-                mFileManager.append(
-                        mContext.getString(R.string.message_processed_failed) + " " + e
-                                .getMessage());
-            } finally {
-                if (200 == mAppHttpClient.getResponse().code()) {
 
-                    mFileManager.append(
-                            mContext.getString(R.string.message_processed_success));
+                Response resp = mAppHttpClient.getResponse();
+                if (200 == resp.code()) {
+                    mFileManager.append(mContext.getString(R.string.message_processed_success));
                     response = parseMessagesUUIDSResponse(mAppHttpClient);
                     response.setSuccess(true);
-                    mFileManager.append(
-                            mContext.getString(R.string.message_processed_success));
-
+                    mFileManager.append(mContext.getString(R.string.message_processed_success));
                 } else {
-                    response = new MessagesUUIDSResponse(mAppHttpClient.getResponse().code());
-                    mFileManager.append(
-                            mContext.getString(R.string.queued_messages_request_status,
-                                    mAppHttpClient.getResponse().code(),
-                                    mAppHttpClient.getResponse().toString()));
+                    response = new MessagesUUIDSResponse(resp.code());
+                    mFileManager.append(mContext.getString(R.string.queued_messages_request_status,
+                            resp.code(), resp.toString()));
                 }
+            } catch (Exception e) {
+                Logger.log(TAG, "sendQueuedMessages failed", e);
+                mFileManager.append(mContext.getString(R.string.message_processed_failed) + " " + e.getMessage());
+                response = new MessagesUUIDSResponse(-1);
             }
         }
         return response;
@@ -226,23 +224,21 @@ public class ProcessMessageResult {
         try {
             mAppHttpClient.setMethod(BaseHttpClient.HttpMethod.GET);
             mAppHttpClient.execute();
-        } catch (JSONException e) {
-            mFileManager.append(
-                    mContext.getString(R.string.message_processed_json_failed) + " " + e
-                            .getMessage());
-        } catch (Exception e) {
-            mFileManager.append(
-                    mContext.getString(R.string.message_processed_failed) + " " + e.getMessage());
-        } finally {
-            if (200 == mAppHttpClient.getResponse().code()) {
+
+            Response resp = mAppHttpClient.getResponse();
+            if (200 == resp.code()) {
                 response = parseMessagesUUIDSResponse(mAppHttpClient);
                 response.setSuccess(true);
             } else {
-                response = new MessagesUUIDSResponse(mAppHttpClient.getResponse().code());
-                mFileManager.append(
-                        mContext.getString(R.string.messages_result_request_status,
-                                mAppHttpClient.getResponse().code(), mAppHttpClient.getResponse()));
+                response = new MessagesUUIDSResponse(resp.code());
+                mFileManager.append(mContext.getString(R.string.messages_result_request_status,
+                        resp.code(), resp.toString()));
             }
+        } catch (Exception e) {
+            Logger.log(TAG, "sendMessageResult failed", e);
+            mFileManager.append(mContext.getString(R.string.message_processed_failed)
+                    + " " + e.getMessage());
+            response = new MessagesUUIDSResponse(-1);
         }
         return response;
     }
@@ -260,18 +256,17 @@ public class ProcessMessageResult {
 
     private MessagesUUIDSResponse parseMessagesUUIDSResponse(AppHttpClient client) {
         MessagesUUIDSResponse response;
-
         try {
-
             final Gson gson = new Gson();
             final int code = client.getResponse().code();
             response = gson.fromJson(client.getResponse().body().charStream(),
                     MessagesUUIDSResponse.class);
             response.setStatusCode(code);
         } catch (Exception e) {
-            e.printStackTrace();
-            response = new MessagesUUIDSResponse(client.getResponse().code());
-            mFileManager.append(mContext.getString(R.string.message_processed_json_failed));
+            Logger.log(TAG, "parseMessages failed", e);
+            response = new MessagesUUIDSResponse(-1);
+            mFileManager.append(mContext.getString(R.string.message_processed_json_failed)
+                    + " " + e.getMessage());
         }
         return response;
     }
