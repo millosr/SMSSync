@@ -130,6 +130,9 @@ public class IntegrationPresenter implements Presenter {
             // Run check task service
             mServiceControl.runCheckTaskService();
 
+            // Run message results service
+            mServiceControl.runMessageResultsService();
+
             // Show notification
             Utility.showNotification(mIntegrationView.getAppContext());
             return;
@@ -146,6 +149,7 @@ public class IntegrationPresenter implements Presenter {
 
         mServiceControl.stopCheckTaskService();
         mServiceControl.stopAutoSyncService();
+        mServiceControl.stopMessageResultsService();
 
         // Stop check task schedule
         mIntegrationView.getAppContext().stopService(
