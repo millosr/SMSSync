@@ -104,8 +104,7 @@ public class PostMessage extends ProcessMessage {
             mProcessSms.sendSms(map(msg), false);
         }
         if (isConnected()) {
-            List<SyncUrl> syncUrlList = mWebServiceDataSource
-                    .get(SyncUrl.Status.ENABLED);
+            List<SyncUrl> syncUrlList = mWebServiceDataSource.get(SyncUrl.Status.ENABLED);
             List<Filter> filters = mFilterDataSource.getFilters();
             for (SyncUrl syncUrl : syncUrlList) {
                 // Process if white-listing is enabled
@@ -176,7 +175,7 @@ public class PostMessage extends ProcessMessage {
 
     public boolean postMessage(List<Message> messages) {
         Logger.log(TAG, "postMessages");
-        List<SyncUrl> syncUrlList = mWebServiceDataSource.listWebServices();
+        List<SyncUrl> syncUrlList = mWebServiceDataSource.get(SyncUrl.Status.ENABLED);
         List<Filter> filters = mFilterDataSource.getFilters();
         for (SyncUrl syncUrl : syncUrlList) {
             // Process if white-listing is enabled
@@ -219,7 +218,7 @@ public class PostMessage extends ProcessMessage {
 
     public boolean routePendingMessage(Message message) {
         Logger.log(TAG, "postMessages");
-        List<SyncUrl> syncUrlList = mWebServiceDataSource.listWebServices();
+        List<SyncUrl> syncUrlList = mWebServiceDataSource.get(SyncUrl.Status.ENABLED);
         List<Filter> filters = mFilterDataSource.getFilters();
         for (SyncUrl syncUrl : syncUrlList) {
             // Process if white-listing is enabled
