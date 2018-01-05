@@ -111,7 +111,9 @@ public class ProcessMessageResult {
                         messageResults.add(messageResult);
                     }
                 }
-                sendMessageResultPOSTRequest(syncUrl, messageResults);
+                if (messageResults.size() > 0) {
+                    sendMessageResultPOSTRequest(syncUrl, messageResults);
+                }
             }
         }
     }
